@@ -122,12 +122,6 @@ body {
   background: var(--login-cta-hover);
 }
 
-.login-container .login-form .register-div {
-  text-align: center;
-  color: var(--text);
-  font-size: 14px;
-  margin-top: 20px;
-}
 
 .login-container .login-form .single-row.center-forgot {
   text-align: center;

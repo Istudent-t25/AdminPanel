@@ -31,11 +31,6 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
     onLogin()
   }
 
-  const handleCreateAccount = (e: React.MouseEvent) => {
-    e.preventDefault()
-    // Create account - directly go to dashboard
-    onLogin()
-  }
 
   return (
     <div className="login-container">
@@ -83,13 +78,6 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
               Login
             </button>
           </form>
-          
-          <div className="register-div">
-            Not registered yet? {' '}
-            <a href="#" className="link create-account" onClick={handleCreateAccount}>
-              Create an account ?
-            </a>
-          </div>
         </div>
       </div>
     </div>
