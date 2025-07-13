@@ -1,0 +1,239 @@
+@import url("https://fonts.googleapis.com/css2?family=Raleway:wght@200;300;400;500&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bodybg: #dcdefe;
+  --primary-color: #5138ee;
+  --grey: #d6d6d6;
+  --placeholder: #969696;
+  --white: #fff;
+  --text: #333;
+  --slider-bg: #eff3ff;
+  --login-cta-hover: #1f0098;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+/* Login Design Styles */
+body {
+  background: var(--bodybg);
+  font-family: "Raleway", sans-serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  min-height: 100vh;
+  background: var(--white);
+  margin: 0;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.login-container .login-form {
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto;
+  padding: 32px 20px;
+  box-sizing: border-box;
+  background: var(--white);
+  border-radius: 0;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.login-container .login-form .login-form-inner {
+  max-width: 100%;
+  width: 100%;
+}
+
+.login-container .logo img {
+  height: 100px;
+  width: 100px;
+  display: block;
+  margin: 0 auto 24px auto;
+}
+
+.login-container .login-form .login-form-group {
+  margin-bottom: 20px;
+}
+
+.login-container .login-form .login-form-group input {
+  width: 100%;
+  height: 48px;
+  border: 1px solid var(--grey);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text);
+  background: var(--white);
+  box-sizing: border-box;
+  transition: 0.2s ease all;
+}
+
+.login-container .login-form .login-form-group input:focus {
+  outline: none;
+  border: 1px solid var(--primary-color);
+}
+
+.login-container .login-form .link {
+  color: var(--primary-color);
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.login-container .login-form .link:hover {
+  text-decoration: underline;
+}
+
+.login-container .login-form .login-cta {
+  background: var(--primary-color);
+  color: var(--white);
+  border: none;
+  border-radius: 8px;
+  padding: 16px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s ease all;
+  width: 100%;
+  margin: 20px 0;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+}
+
+.login-container .login-form .login-cta:hover {
+  background: var(--login-cta-hover);
+}
+
+.login-container .login-form .register-div {
+  text-align: center;
+  color: var(--text);
+  font-size: 14px;
+  margin-top: 20px;
+}
+
+.login-container .login-form .single-row.center-forgot {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Floating label styles */
+.login-form-group.floating-label-group {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.login-form-group.floating-label-group input {
+  padding: 20px 20px 13px 20px;
+  height: 48px;
+}
+
+.login-form-group.floating-label-group label {
+  position: absolute;
+  left: 20px;
+  top: 16px;
+  color: var(--placeholder);
+  font-size: 14px;
+  font-weight: 400;
+  background: var(--white);
+  padding: 0 4px;
+  pointer-events: none;
+  transition: 0.2s ease all;
+}
+
+.login-form-group.floating-label-group input:focus + label,
+.login-form-group.floating-label-group input:not(:placeholder-shown):not([type='checkbox']) + label,
+.login-form-group.floating-label-group input:valid + label {
+  top: -10px;
+  left: 16px;
+  font-size: 12px;
+  color: var(--primary-color);
+  background: var(--white);
+  padding: 0 4px;
+}
+
+.login-form-group.floating-label-group input:focus {
+  border: 1px solid var(--primary-color);
+}
+
+/* Responsive styles */
+@media screen and (max-width: 767px) {
+  .login-container {
+    height: auto;
+  }
+  .login-container .login-form {
+    padding: 16px 4px;
+  }
+}
+
+@media screen and (max-width: 420px) {
+  .login-container .login-form {
+    padding: 20px;
+  }
+  .login-container .login-form-group {
+    margin-bottom: 16px;
+  }
+  .login-container {
+    margin: 0;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .login-container .login-form {
+    max-width: 100vw;
+    padding: 16px 4px;
+  }
+}
+
+@layer base {
+  html {
+    font-family: 'Raleway', system-ui, sans-serif;
+    /* Mobile app optimizations */
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Touch-friendly input styling */
+  input, button {
+    -webkit-appearance: none;
+    border-radius: 8px;
+  }
+  
+  /* Prevent zoom on input focus (iOS) */
+  input[type="text"], 
+  input[type="email"], 
+  input[type="password"] {
+    font-size: 16px;
+  }
+}
+
+@layer components {
+  .glass-effect {
+    @apply backdrop-blur-md bg-white/10 border border-white/20;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300;
+  }
+  
+  .btn-primary {
+    @apply w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-transparent;
+  }
+}
