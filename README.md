@@ -1,10 +1,10 @@
 # iStudent Admin Dashboard
 
-A comprehensive admin panel for managing student data, courses, and educational content. Built with modern web technologies for optimal performance and user experience.
+ Admin panel for managing student data, courses, and educational content.
 
 ## Overview
 
-This admin dashboard provides a complete interface for educational administrators to manage students, courses, instructors, and track learning analytics. The application features a responsive design with Kurdish language support and real-time data visualization.
+This admin dashboard provides a complete interface for educational administrators to manage students, courses, instructors, and track learning analytics.
 
 ## Key Features
 
