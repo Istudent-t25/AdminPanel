@@ -6,6 +6,7 @@ import {
   BarChart3, TrendingUp, Calendar, Bell, Search, Plus,
   GraduationCap, Award, Clock, Activity, Play, FileText
 } from 'lucide-react'
+import BooksSection from './BooksSection'
 
 interface AdminPanelProps {
   onLogout: () => void
@@ -303,6 +304,10 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
                 </button>
               </div>
                 </div>
+              </div>
+            ) : activeSection === 'کتێبەکان' ? (
+              <div className="max-w-7xl mx-auto p-6">
+                <BooksSection />
               </div>
             ) : (
               <div className="max-w-7xl mx-auto p-6 h-full">
