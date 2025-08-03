@@ -99,7 +99,7 @@ export default function BooksTable({
         </div>
 
         {/* Filters and Search */}
-        <div className="flex flex-col lg:flex-row gap-4">
+        <div className="flex flex-col xl:flex-row gap-4">
           {/* Search */}
           <div className="flex-1">
             <div className="relative">
@@ -115,7 +115,7 @@ export default function BooksTable({
           </div>
 
           {/* Subject Filter */}
-          <div className="w-full lg:w-48">
+          <div className="w-full xl:w-48">
             <select
               value={selectedSubject}
               onChange={(e) => setSelectedSubject(e.target.value)}
@@ -129,7 +129,7 @@ export default function BooksTable({
           </div>
 
           {/* Grade Filter */}
-          <div className="w-full lg:w-32">
+          <div className="w-full xl:w-32">
             <select
               value={selectedGrade}
               onChange={(e) => setSelectedGrade(e.target.value)}
@@ -146,7 +146,7 @@ export default function BooksTable({
           </div>
 
           {/* Section Filter */}
-          <div className="w-full lg:w-32">
+          <div className="w-full xl:w-32">
             <select
               value={selectedSection}
               onChange={(e) => setSelectedSection(e.target.value)}

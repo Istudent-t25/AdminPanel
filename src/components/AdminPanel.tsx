@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import BooksSection from './BooksSection'
 import AlertManagement from './AlertManagement'
+import TeachersSection from './TeachersSection'
 import { toArabicIndic, formatDateArabicIndic, formatNumberArabicIndic } from '@/lib/numberUtils'
 
 interface AdminPanelProps {
@@ -390,8 +391,21 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
                 </div>
               </div>
             ) : activeSection === 'کتێبەکان' ? (
+              <div className="h-full flex">
+                {/* Books Section - Left Side */}
+                <div className="w-3/5 min-w-[700px] bg-white border-l border-gray-200 p-6 overflow-y-auto">
+                  <h3 className="text-xl font-semibold text-gray-900 mb-6 text-right">کتێبەکان</h3>
+                  <BooksSection compact={false} />
+                </div>
+                
+                {/* Teachers Section - Right Side (Bigger) */}
+                <div className="w-2/5 min-w-[500px] p-6 overflow-y-auto">
+                  <TeachersSection />
+                </div>
+              </div>
+            ) : activeSection === 'مامۆستاکان و وانەکان' ? (
               <div className="max-w-7xl mx-auto p-6">
-                <BooksSection />
+                <TeachersSection />
               </div>
             ) : activeSection === 'نووسینەکان' ? (
               <div className="max-w-7xl mx-auto p-6">

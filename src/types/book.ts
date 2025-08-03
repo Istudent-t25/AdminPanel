@@ -23,6 +23,8 @@ export interface Subject {
 export interface Teacher {
   id: string
   name: string
+  subject?: string
+  subjectId?: string
 }
 
 export interface BookFormData {

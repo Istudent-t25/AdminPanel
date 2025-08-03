@@ -2,36 +2,60 @@
 
 import { useState, useEffect } from 'react'
 import { Book, Subject, Teacher } from '@/types/book'
-import { bookService } from '@/lib/bookService'
+import { dataManager } from '@/lib/dataManager'
 import BooksTable from './BooksTable'
+import CompactBooksTable from './CompactBooksTable'
 
-export default function BooksSection() {
+export default function BooksSection({ compact = false }: { compact?: boolean }) {
   const [books, setBooks] = useState<Book[]>([])
   const [subjects, setSubjects] = useState<Subject[]>([])
   const [teachers, setTeachers] = useState<Teacher[]>([])
   const [loading, setLoading] = useState(true)
 
+  const loadData = () => {
+    try {
+      setBooks(dataManager.getBooks())
+      setSubjects(dataManager.getSubjects())
+      setTeachers(dataManager.getTeachersForDropdown())
+    } catch (error) {
+      console.error('Error loading data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
-    // Load initial data
-    const loadData = async () => {
-      try {
-        setBooks(bookService.getBooks())
-        setSubjects(bookService.getSubjects())
-        setTeachers(bookService.getTeachers())
-      } catch (error) {
-        console.error('Error loading data:', error)
-      } finally {
-        setLoading(false)
-      }
+    loadData()
+
+    // Subscribe to data changes
+    const handleTeacherChange = () => {
+      setTeachers(dataManager.getTeachersForDropdown())
     }
 
-    loadData()
+    const handleBookChange = () => {
+      setBooks(dataManager.getBooks())
+    }
+
+    dataManager.subscribe('teacher-added', handleTeacherChange)
+    dataManager.subscribe('teacher-updated', handleTeacherChange)
+    dataManager.subscribe('teacher-deleted', handleTeacherChange)
+    dataManager.subscribe('book-added', handleBookChange)
+    dataManager.subscribe('book-updated', handleBookChange)
+    dataManager.subscribe('book-deleted', handleBookChange)
+
+    return () => {
+      dataManager.unsubscribe('teacher-added', handleTeacherChange)
+      dataManager.unsubscribe('teacher-updated', handleTeacherChange)
+      dataManager.unsubscribe('teacher-deleted', handleTeacherChange)
+      dataManager.unsubscribe('book-added', handleBookChange)
+      dataManager.unsubscribe('book-updated', handleBookChange)
+      dataManager.unsubscribe('book-deleted', handleBookChange)
+    }
   }, [])
 
   const handleAddBook = (bookData: Omit<Book, 'id' | 'bookId' | 'timeClicked' | 'clickCount' | 'favoritesCount' | 'dateAdded'>) => {
     try {
-      const newBook = bookService.addBook(bookData)
-      setBooks(prev => [...prev, newBook])
+      dataManager.addBook(bookData)
     } catch (error) {
       console.error('Error adding book:', error)
       alert('هەڵەیەک ڕوویدا لە زیادکردنی کتێبەکە')
@@ -40,10 +64,7 @@ export default function BooksSection() {
 
   const handleEditBook = (id: string, bookData: Omit<Book, 'id' | 'bookId' | 'timeClicked' | 'clickCount' | 'favoritesCount' | 'dateAdded'>) => {
     try {
-      const updatedBook = bookService.updateBook(id, bookData)
-      if (updatedBook) {
-        setBooks(prev => prev.map(book => book.id === id ? updatedBook : book))
-      }
+      dataManager.updateBook(id, bookData)
     } catch (error) {
       console.error('Error updating book:', error)
       alert('هەڵەیەک ڕوویدا لە نوێکردنەوەی کتێبەکە')
@@ -52,10 +73,7 @@ export default function BooksSection() {
 
   const handleDeleteBook = (id: string) => {
     try {
-      const success = bookService.deleteBook(id)
-      if (success) {
-        setBooks(prev => prev.filter(book => book.id !== id))
-      }
+      dataManager.deleteBook(id)
     } catch (error) {
       console.error('Error deleting book:', error)
       alert('هەڵەیەک ڕوویدا لە سڕینەوەی کتێبەکە')
@@ -70,8 +88,10 @@ export default function BooksSection() {
     )
   }
 
+  const TableComponent = compact ? CompactBooksTable : BooksTable
+
   return (
-    <BooksTable
+    <TableComponent
       books={books}
       subjects={subjects}
       teachers={teachers}

@@ -18,7 +18,7 @@ This admin dashboard provides a complete interface for educational administrator
 - **Multi-section Navigation**: 
   - Home Dashboard (سەرەتا)
   - Books Management (کتێبەکان)
-  - Teachers & Lessons (مامۆستاکان و وانەکان)
+  - Teachers Management (مامۆستاکان و وانەکان)
   - Video Content (ڤیدیۆکان)
   - Assignments (ئەسیلەکان)
   - Analytics (شیکاری)
@@ -31,6 +31,12 @@ This admin dashboard provides a complete interface for educational administrator
   - Notification system
   - Profile management dropdown
   - Quick action buttons
+
+### 📚 Books & Teachers Management
+- **Books Section**: Grid/List views, filtering, search, real-time updates
+- **Teachers Section**: Professional card layout, subject assignment
+- **Real-time Synchronization**: Books and teachers data sync automatically
+- **Teacher Naming Convention**: Automatic "م." prefix for all teachers
 
 ### Frontend Stack
 - **Next.js 14**: React framework with App Router
@@ -57,6 +63,8 @@ src/
 │   └── page.tsx            # Main application entry point
 ├── components/
 │   ├── AdminPanel.tsx      # Main dashboard component
+│   ├── BooksSection.tsx    # Books management interface
+│   ├── TeachersSection.tsx # Teachers management interface
 │   └── LoginPage.tsx       # Authentication interface
 └── lib/
     └── auth.ts             # Authentication utilities
