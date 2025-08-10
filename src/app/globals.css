@@ -4,6 +4,34 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+  
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  
+  /* Ensure responsive design works at all zoom levels */
+  .responsive-container {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  
+  /* Smooth transitions for responsive elements */
+  .responsive-transition {
+    transition: all 0.2s ease-in-out;
+  }
+}
+
 /* Custom utilities for better text handling */
 .line-clamp-2 {
   display: -webkit-box;

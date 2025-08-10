@@ -1,11 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Plus, Search, Edit, Trash2, User, BookOpen, Filter } from 'lucide-react'
+import { Plus, Search, Edit, Trash2, User, BookOpen, Filter, Upload, FileText } from 'lucide-react'
 import { Teacher, TeacherFormData } from '@/types/teacher'
 import { Subject, Book } from '@/types/book'
 import { dataManager } from '@/lib/dataManager'
 import TeacherModal from './TeacherModal'
+import JsonImportModal from './JsonImportModal'
+import DataListView from './DataListView'
 import { toArabicIndic, formatDateArabicIndic } from '@/lib/numberUtils'
 
 export default function TeachersSection() {
@@ -18,6 +20,8 @@ export default function TeachersSection() {
   const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isAddMode, setIsAddMode] = useState(false)
+  const [viewMode, setViewMode] = useState<'grid' | 'data-list'>('grid')
+  const [isJsonImportOpen, setIsJsonImportOpen] = useState(false)
 
   const loadData = () => {
     try {
@@ -109,6 +113,29 @@ export default function TeachersSection() {
     setIsModalOpen(true)
   }
 
+  const handleJsonImport = (jsonData: any[]) => {
+    jsonData.forEach(teacherData => {
+      // Find subject by ID
+      const subject = subjects.find(s => s.id === teacherData.subjectId)
+      if (!subject) {
+        console.warn(`Subject not found: ${teacherData.subjectId}`)
+        return
+      }
+
+      // Create teacher object
+      const newTeacherData: TeacherFormData = {
+        name: teacherData.name,
+        subjectId: teacherData.subjectId
+      }
+
+      try {
+        dataManager.addTeacher(newTeacherData)
+      } catch (error) {
+        console.error('Error adding teacher:', error)
+      }
+    })
+  }
+
   // Filter teachers
   const filteredTeachers = teachers.filter(teacher => {
     const matchesSearch = teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -138,13 +165,39 @@ export default function TeachersSection() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-semibold text-gray-900 text-right">بەڕێوەبردنی مامۆستاکان</h2>
-        <button
-          onClick={openAddModal}
-          className="flex items-center space-x-2 space-x-reverse px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          <span>زیادکردنی مامۆستا</span>
-        </button>
+        <div className="flex items-center space-x-3 space-x-reverse">
+          {/* View Mode Toggle */}
+          <div className="flex border border-gray-300 rounded-lg overflow-hidden">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-2 ${viewMode === 'grid' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+              title="بینینی کارت"
+            >
+              <User className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('data-list')}
+              className={`p-2 ${viewMode === 'data-list' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+              title="بینینی داتا"
+            >
+              <FileText className="w-4 h-4" />
+            </button>
+          </div>
+          <button
+            onClick={() => setIsJsonImportOpen(true)}
+            className="flex items-center space-x-2 space-x-reverse px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+          >
+            <Upload className="w-4 h-4" />
+            <span>هاوردەی JSON</span>
+          </button>
+          <button
+            onClick={openAddModal}
+            className="flex items-center space-x-2 space-x-reverse px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            <span>زیادکردنی مامۆستا</span>
+          </button>
+        </div>
       </div>
 
       {/* Simple Filters */}
@@ -202,7 +255,13 @@ export default function TeachersSection() {
 
       {/* Teachers Grid */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        {filteredTeachers.length === 0 ? (
+        {viewMode === 'data-list' ? (
+          <DataListView 
+            data={filteredTeachers} 
+            type="teachers" 
+            title="لیستی مامۆستاکان"
+          />
+        ) : filteredTeachers.length === 0 ? (
           <div className="text-center py-12">
             <User className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-600 mb-2">هیچ مامۆستایەک نەدۆزرایەوە</h3>
@@ -210,12 +269,20 @@ export default function TeachersSection() {
               {searchTerm || selectedSubject ? 'فلتەرەکانت بگۆڕە یان مامۆستای نوێ زیاد بکە' : 'یەکەم مامۆستات زیاد بکە'}
             </p>
             {!searchTerm && !selectedSubject && (
-              <button
-                onClick={openAddModal}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
-              >
-                یەکەم مامۆستا زیاد بکە
-              </button>
+              <div className="space-y-3">
+                <button
+                  onClick={openAddModal}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 mr-3"
+                >
+                  یەکەم مامۆستا زیاد بکە
+                </button>
+                <button
+                  onClick={() => setIsJsonImportOpen(true)}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200"
+                >
+                  یان بە JSON هاورده بکە
+                </button>
+              </div>
             )}
           </div>
         ) : (
@@ -338,6 +405,15 @@ export default function TeachersSection() {
           books={books.map(book => ({ id: book.id, title: book.title }))}
           onSave={handleSave}
           onClose={() => setIsModalOpen(false)}
+        />
+      )}
+
+      {/* JSON Import Modal */}
+      {isJsonImportOpen && (
+        <JsonImportModal
+          type="teachers"
+          onImport={handleJsonImport}
+          onClose={() => setIsJsonImportOpen(false)}
         />
       )}
     </div>

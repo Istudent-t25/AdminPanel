@@ -10,6 +10,7 @@ import {
 import BooksSection from './BooksSection'
 import AlertManagement from './AlertManagement'
 import TeachersSection from './TeachersSection'
+import WritingsSection from './WritingsSection'
 import { toArabicIndic, formatDateArabicIndic, formatNumberArabicIndic } from '@/lib/numberUtils'
 
 interface AdminPanelProps {
@@ -146,7 +147,7 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
   ]
 
   return (
-    <div className="min-h-screen w-full bg-gray-50" dir="rtl" style={{minWidth: '1024px'}}>
+    <div className="min-h-screen w-full bg-gray-50 overflow-x-auto" dir="rtl" style={{minWidth: '320px'}}>
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
         <div className="flex items-center justify-between px-6 py-3">
@@ -391,16 +392,26 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
                 </div>
               </div>
             ) : activeSection === 'کتێبەکان' ? (
-              <div className="h-full flex">
-                {/* Books Section - Left Side */}
-                <div className="w-3/5 min-w-[700px] bg-white border-l border-gray-200 p-6 overflow-y-auto">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-6 text-right">کتێبەکان</h3>
-                  <BooksSection compact={false} />
+              <div className="h-full flex flex-col xl:flex-row">
+                {/* Books Section - Main Area */}
+                <div className="flex-1 xl:w-3/5 xl:min-w-0 bg-white xl:border-l border-gray-200 overflow-hidden">
+                  <div className="h-full flex flex-col">
+                    <div className="flex-shrink-0 px-4 sm:px-6 py-4 border-b border-gray-200">
+                      <h3 className="text-lg sm:text-xl font-semibold text-gray-900 text-right">کتێبەکان</h3>
+                    </div>
+                    <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
+                      <BooksSection compact={false} />
+                    </div>
+                  </div>
                 </div>
                 
-                {/* Teachers Section - Right Side (Bigger) */}
-                <div className="w-2/5 min-w-[500px] p-6 overflow-y-auto">
-                  <TeachersSection />
+                {/* Teachers Section - Side Panel */}
+                <div className="xl:w-2/5 xl:min-w-0 xl:max-w-lg bg-gray-50 overflow-hidden">
+                  <div className="h-full flex flex-col">
+                    <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+                      <TeachersSection />
+                    </div>
+                  </div>
                 </div>
               </div>
             ) : activeSection === 'مامۆستاکان و وانەکان' ? (
@@ -408,215 +419,12 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
                 <TeachersSection />
               </div>
             ) : activeSection === 'نووسینەکان' ? (
-              <div className="max-w-7xl mx-auto p-6">
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4 text-right">نووسینەکان</h2>
-                  
-                  {/* Sub-tabs */}
-                  <div className="flex space-x-2 space-x-reverse mb-4 border-b border-gray-200">
-                    <button
-                      onClick={() => setWritingSubSection('ئاگاداریەکان')}
-                      className={`px-4 py-2 text-sm font-medium transition-colors duration-200 border-b-2 ${
-                        writingSubSection === 'ئاگاداریەکان'
-                          ? 'border-red-500 text-red-600'
-                          : 'border-transparent text-gray-600 hover:text-gray-900'
-                      }`}
-                    >
-                      <AlertTriangle className="w-4 h-4 inline-block ml-2" />
-                      ئاگاداریەکان
-                    </button>
-                    <button
-                      onClick={() => setWritingSubSection('وتەی ڕۆژانە')}
-                      className={`px-4 py-2 text-sm font-medium transition-colors duration-200 border-b-2 ${
-                        writingSubSection === 'وتەی ڕۆژانە'
-                          ? 'border-green-500 text-green-600'
-                          : 'border-transparent text-gray-600 hover:text-gray-900'
-                      }`}
-                    >
-                      <MessageSquare className="w-4 h-4 inline-block ml-2" />
-                      وتەی ڕۆژانە
-                    </button>
-                  </div>
-
-                  {/* Content based on selected sub-tab */}
-                  {writingSubSection === 'ئاگاداریەکان' ? (
-                    <AlertManagement />
-                  ) : (
-                    <div className="space-y-6">
-                      {/* Month Navigation */}
-                      <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-lg p-4">
-                        <div className="flex items-center space-x-4 space-x-reverse">
-                          <button
-                            onClick={() => {
-                              if (selectedMonth === 0) {
-                                setSelectedMonth(11)
-                                setSelectedYear(selectedYear - 1)
-                              } else {
-                                setSelectedMonth(selectedMonth - 1)
-                              }
-                            }}
-                            className="p-2 hover:bg-green-100 rounded-lg transition-colors"
-                          >
-                            <ChevronRight className="w-5 h-5 text-green-700" />
-                          </button>
-                          <h3 className="text-lg font-semibold text-green-800">
-                            {getMonthName(selectedMonth)} {toArabicIndic(selectedYear)}
-                          </h3>
-                          <button
-                            onClick={() => {
-                              if (selectedMonth === 11) {
-                                setSelectedMonth(0)
-                                setSelectedYear(selectedYear + 1)
-                              } else {
-                                setSelectedMonth(selectedMonth + 1)
-                              }
-                            }}
-                            className="p-2 hover:bg-green-100 rounded-lg transition-colors"
-                          >
-                            <ChevronLeft className="w-5 h-5 text-green-700" />
-                          </button>
-                        </div>
-                        <div className="text-sm text-green-700">
-                          بەڕێوەبردنی وتەکانی مانگ
-                        </div>
-                      </div>
-
-                      {/* Calendar Grid */}
-                      <div className="bg-white border border-gray-200 rounded-lg p-4">
-                        <div className="grid grid-cols-7 gap-2 mb-4">
-                          {['شەممە', 'یەکشەممە', 'دووشەممە', 'سێشەممە', 'چوارشەممە', 'پێنجشەممە', 'هەینی'].map(day => (
-                            <div key={day} className="text-center text-sm font-medium text-gray-600 py-2">
-                              {day}
-                            </div>
-                          ))}
-                        </div>
-                        
-                        <div className="grid grid-cols-7 gap-2">
-                          {Array.from({ length: getDaysInMonth(selectedMonth, selectedYear) }, (_, i) => {
-                            const day = i + 1
-                            const speech = getSpeechForDate(day)
-                            const today = new Date()
-                            const isToday = today.getDate() === day && 
-                                          today.getMonth() === selectedMonth && 
-                                          today.getFullYear() === selectedYear
-                            
-                            return (
-                              <button
-                                key={day}
-                                onClick={() => handleEditSpeech(day)}
-                                className={`
-                                  aspect-square p-2 rounded-lg border-2 transition-all duration-200 relative
-                                  ${isToday ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-green-300'}
-                                  ${speech ? 'bg-green-100 border-green-300' : 'hover:bg-gray-50'}
-                                `}
-                              >
-                                <div className="text-sm font-medium text-gray-900">{toArabicIndic(day)}</div>
-                                {speech && (
-                                  <div className={`
-                                    absolute bottom-1 right-1 w-2 h-2 rounded-full
-                                    ${speech.status === 'published' ? 'bg-green-500' : 'bg-blue-500'}
-                                  `} />
-                                )}
-                                {isToday && (
-                                  <div className="absolute top-1 left-1 w-2 h-2 bg-blue-500 rounded-full" />
-                                )}
-                              </button>
-                            )
-                          })}
-                        </div>
-                        
-                        {/* Legend */}
-                        <div className="flex items-center justify-center space-x-6 space-x-reverse mt-4 pt-4 border-t border-gray-200 text-xs">
-                          <div className="flex items-center space-x-2 space-x-reverse">
-                            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                            <span>بڵاوکراوەتەوە</span>
-                          </div>
-                          <div className="flex items-center space-x-2 space-x-reverse">
-                            <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                            <span>خشتەکراوە</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Speech Editor Modal */}
-                      {editingSpeech && (
-                        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                            <div className="p-6 border-b border-gray-200">
-                              <div className="flex items-center justify-between">
-                                <h3 className="text-lg font-semibold text-gray-900">
-                                  وتەی ڕۆژی {editingSpeech.scheduledDate}
-                                </h3>
-                                <button
-                                  onClick={() => setEditingSpeech(null)}
-                                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                                >
-                                  <X className="w-5 h-5" />
-                                </button>
-                              </div>
-                            </div>
-                            
-                            <div className="p-6 space-y-4">
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
-                                  ناونیشانی وتە
-                                </label>
-                                <input
-                                  type="text"
-                                  value={editingSpeech.title}
-                                  onChange={(e) => setEditingSpeech({...editingSpeech, title: e.target.value})}
-                                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-right"
-                                  placeholder="ناونیشانی وتەی ڕۆژانە بنووسە..."
-                                />
-                              </div>
-                              
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
-                                  ناوەڕۆکی وتە
-                                </label>
-                                <textarea
-                                  rows={8}
-                                  value={editingSpeech.content}
-                                  onChange={(e) => setEditingSpeech({...editingSpeech, content: e.target.value})}
-                                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-right"
-                                  placeholder="وتەی ڕۆژانەت بنووسە..."
-                                />
-                              </div>
-                              
-                              <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                                <div className="flex items-center space-x-3 space-x-reverse">
-                                  <button
-                                    onClick={handleSaveSpeech}
-                                    className="flex items-center space-x-2 space-x-reverse px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                                  >
-                                    <CalendarIcon className="w-4 h-4" />
-                                    <span>پاشەکەوت و خشتەکردن</span>
-                                  </button>
-                                </div>
-                                
-                                {editingSpeech.id && (
-                                  <button
-                                    onClick={() => {
-                                      if (confirm('ئایا دڵنیایت لە سڕینەوەی ئەم وتەیە؟')) {
-                                        deleteDailySpeech(editingSpeech.id!)
-                                        setEditingSpeech(null)
-                                      }
-                                    }}
-                                    className="flex items-center space-x-2 space-x-reverse px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                    <span>سڕینەوە</span>
-                                  </button>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
+              <WritingsSection
+                dailySpeeches={dailySpeeches}
+                onAddSpeech={addDailySpeech}
+                onUpdateSpeech={updateDailySpeech}
+                onDeleteSpeech={deleteDailySpeech}
+              />
             ) : activeSection === 'تاقیکردنەوەکان' ? (
               <div className="max-w-7xl mx-auto p-6">
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">

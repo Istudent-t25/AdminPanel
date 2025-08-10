@@ -1,9 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { Edit, Trash2, Plus, Search, Filter, BookOpen, User, Calendar, Eye, Heart, Grid, List } from 'lucide-react'
+import { Edit, Trash2, Plus, Search, Filter, BookOpen, User, Calendar, Eye, Heart, Grid, List, Upload, FileText } from 'lucide-react'
 import { Book, Subject, Teacher } from '@/types/book'
 import BookModal from './BookModal'
+import JsonImportModal from './JsonImportModal'
+import DataListView from './DataListView'
 import { toArabicIndic, formatDateArabicIndic } from '@/lib/numberUtils'
 
 interface BooksTableProps {
@@ -30,7 +32,8 @@ export default function BooksTable({
   const [selectedBook, setSelectedBook] = useState<Book | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isAddMode, setIsAddMode] = useState(false)
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'data-list'>('grid')
+  const [isJsonImportOpen, setIsJsonImportOpen] = useState(false)
 
   // Get unique grades for filter
   const uniqueGrades = Array.from(new Set(books.map(book => book.grade))).filter(grade => grade !== 'نەزانراو')
@@ -83,106 +86,154 @@ export default function BooksTable({
     setSelectedSection('')
   }
 
+  const handleJsonImport = (jsonData: any[]) => {
+    jsonData.forEach(bookData => {
+      // Find subject by name
+      const subject = subjects.find(s => s.name === bookData.subjectName)
+      if (!subject) {
+        console.warn(`Subject not found: ${bookData.subjectName}`)
+        return
+      }
+
+      // Create book object
+      const newBookData = {
+        title: bookData.title,
+        url: bookData.url || 'نەزانراو',
+        image: bookData.image || 'نەزانراو',
+        subjectName: bookData.subjectName,
+        teacherName: bookData.teacherName,
+        grade: bookData.grade,
+        bookType: bookData.bookType
+      }
+
+      onAddBook(newBookData)
+    })
+  }
+
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+    <div className="w-full bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
       {/* Header */}
-      <div className="p-6 border-b border-gray-200">
+      <div className="p-3 sm:p-4 lg:p-6 border-b border-gray-200">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-900">بەڕێوەبردنی کتێبەکان</h2>
-          <button
-            onClick={handleAdd}
-            className="flex items-center space-x-2 space-x-reverse px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
-          >
-            <Plus className="w-4 h-4" />
-            <span>زیادکردنی کتێب</span>
-          </button>
+          <div className="flex items-center space-x-3 space-x-reverse">
+            <button
+              onClick={() => setIsJsonImportOpen(true)}
+              className="flex items-center space-x-2 space-x-reverse px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200"
+            >
+              <Upload className="w-4 h-4" />
+              <span>هاوردەی JSON</span>
+            </button>
+            <button
+              onClick={handleAdd}
+              className="flex items-center space-x-2 space-x-reverse px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+            >
+              <Plus className="w-4 h-4" />
+              <span>زیادکردنی کتێب</span>
+            </button>
+          </div>
         </div>
 
         {/* Filters and Search */}
-        <div className="flex flex-col xl:flex-row gap-4">
-          {/* Search */}
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="گەڕان بە ناونیشان، بابەت، مامۆستا..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pr-10 pl-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right"
-              />
+        <div className="space-y-3">
+          {/* Top Row - Search and Main Actions */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            {/* Search */}
+            <div className="flex-1 min-w-0">
+              <div className="relative">
+                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="گەڕان بە ناونیشان، بابەت، مامۆستا..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pr-10 pl-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right"
+                />
+              </div>
+            </div>
+
+            {/* View Mode Toggle */}
+            <div className="flex border border-gray-300 rounded-lg overflow-hidden flex-shrink-0">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`p-2 ${viewMode === 'grid' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+                title="بینینی کارت"
+              >
+                <Grid className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`p-2 ${viewMode === 'list' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+                title="بینینی لیست"
+              >
+                <List className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setViewMode('data-list')}
+                className={`p-2 ${viewMode === 'data-list' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+                title="بینینی داتا"
+              >
+                <FileText className="w-4 h-4" />
+              </button>
             </div>
           </div>
 
-          {/* Subject Filter */}
-          <div className="w-full xl:w-48">
-            <select
-              value={selectedSubject}
-              onChange={(e) => setSelectedSubject(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right"
-            >
-              <option value="">هەموو بابەتەکان</option>
-              {subjects.map(subject => (
-                <option key={subject.id} value={subject.name}>{subject.name}</option>
-              ))}
-            </select>
-          </div>
+          {/* Bottom Row - Filters */}
+          <div className="flex flex-wrap gap-2">
+            {/* Subject Filter */}
+            <div className="flex-1 min-w-[120px] max-w-[200px]">
+              <select
+                value={selectedSubject}
+                onChange={(e) => setSelectedSubject(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right"
+              >
+                <option value="">هەموو بابەتەکان</option>
+                {subjects.map(subject => (
+                  <option key={subject.id} value={subject.name}>{subject.name}</option>
+                ))}
+              </select>
+            </div>
 
-          {/* Grade Filter */}
-          <div className="w-full xl:w-32">
-            <select
-              value={selectedGrade}
-              onChange={(e) => setSelectedGrade(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right"
-            >
-              <option value="">هەموو پۆلەکان</option>
-              {uniqueGrades.concat(['پۆلی حەوت']).sort((a, b) => {
-                const gradeOrder = ['پۆلی حەوت', 'پۆلی هەشت', 'پۆلی نۆ', 'پۆلی دە', 'پۆلی یازدە', 'پۆلی دوازدە'];
-                return gradeOrder.indexOf(a) - gradeOrder.indexOf(b);
-              }).map(grade => (
-                <option key={grade} value={grade}>{grade}</option>
-              ))}
-            </select>
-          </div>
+            {/* Grade Filter */}
+            <div className="flex-1 min-w-[100px] max-w-[150px]">
+              <select
+                value={selectedGrade}
+                onChange={(e) => setSelectedGrade(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right"
+              >
+                <option value="">هەموو پۆلەکان</option>
+                {uniqueGrades.concat(['پۆلی حەوت']).sort((a, b) => {
+                  const gradeOrder = ['پۆلی حەوت', 'پۆلی هەشت', 'پۆلی نۆ', 'پۆلی دە', 'پۆلی یازدە', 'پۆلی دوازدە'];
+                  return gradeOrder.indexOf(a) - gradeOrder.indexOf(b);
+                }).map(grade => (
+                  <option key={grade} value={grade}>{grade}</option>
+                ))}
+              </select>
+            </div>
 
-          {/* Section Filter */}
-          <div className="w-full xl:w-32">
-            <select
-              value={selectedSection}
-              onChange={(e) => setSelectedSection(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right"
-            >
-              <option value="">هەموو بەشەکان</option>
-              <option value="ئەدەبی">ئەدەبی</option>
-              <option value="زانستی">زانستی</option>
-            </select>
-          </div>
+            {/* Section Filter */}
+            <div className="flex-1 min-w-[100px] max-w-[130px]">
+              <select
+                value={selectedSection}
+                onChange={(e) => setSelectedSection(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right"
+              >
+                <option value="">هەموو بەشەکان</option>
+                <option value="ئەدەبی">ئەدەبی</option>
+                <option value="زانستی">زانستی</option>
+              </select>
+            </div>
 
-          {/* View Mode Toggle */}
-          <div className="flex border border-gray-300 rounded-lg overflow-hidden">
-            <button
-              onClick={() => setViewMode('grid')}
-              className={`p-2 ${viewMode === 'grid' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
-            >
-              <Grid className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => setViewMode('list')}
-              className={`p-2 ${viewMode === 'list' ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
-            >
-              <List className="w-4 h-4" />
-            </button>
+            {/* Clear Filters */}
+            {(searchTerm || selectedSubject || selectedGrade || selectedSection) && (
+              <button
+                onClick={clearFilters}
+                className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 flex-shrink-0"
+              >
+                پاککردنەوە
+              </button>
+            )}
           </div>
-
-          {/* Clear Filters */}
-          {(searchTerm || selectedSubject || selectedGrade || selectedSection) && (
-            <button
-              onClick={clearFilters}
-              className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50"
-            >
-              پاککردنەوە
-            </button>
-          )}
         </div>
 
         {/* Results Count */}
@@ -192,8 +243,14 @@ export default function BooksTable({
       </div>
 
       {/* Content */}
-      <div className="p-6">
-        {filteredBooks.length === 0 ? (
+      <div className="p-3 sm:p-4 lg:p-6">
+        {viewMode === 'data-list' ? (
+          <DataListView 
+            data={filteredBooks} 
+            type="books" 
+            title="لیستی کتێبەکان"
+          />
+        ) : filteredBooks.length === 0 ? (
           <div className="text-center py-12">
             <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-600 mb-2">هیچ کتێبێک نەدۆزرایەوە</h3>
@@ -204,16 +261,24 @@ export default function BooksTable({
               }
             </p>
             {!searchTerm && !selectedSubject && !selectedGrade && (
-              <button
-                onClick={handleAdd}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
-              >
-                یەکەم کتێب زیاد بکە
-              </button>
+              <div className="space-y-3">
+                <button
+                  onClick={handleAdd}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 mr-3"
+                >
+                  یەکەم کتێب زیاد بکە
+                </button>
+                <button
+                  onClick={() => setIsJsonImportOpen(true)}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200"
+                >
+                  یان بە JSON هاورده بکە
+                </button>
+              </div>
             )}
           </div>
         ) : viewMode === 'grid' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-6">
             {filteredBooks.map((book) => (
               <div key={book.id} className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200">
                 {/* Book Image */}
@@ -235,29 +300,29 @@ export default function BooksTable({
                 </div>
 
                 {/* Book Info */}
-                <div className="p-4">
-                  <h3 className="font-medium text-gray-900 mb-2 text-right line-clamp-2 leading-tight">
+                <div className="p-3 sm:p-4">
+                  <h3 className="font-medium text-gray-900 mb-2 text-right line-clamp-2 leading-tight text-sm sm:text-base">
                     {book.title}
                   </h3>
                   
-                  <div className="space-y-2 text-sm text-gray-600">
+                  <div className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-gray-600">
                     <div className="flex items-center justify-between">
-                      <span className="text-blue-600 font-medium">{book.subjectName}</span>
-                      <span className="bg-gray-200 px-2 py-1 rounded text-xs">{book.grade}</span>
+                      <span className="text-blue-600 font-medium text-xs sm:text-sm truncate">{book.subjectName}</span>
+                      <span className="bg-gray-200 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs flex-shrink-0">{book.grade}</span>
                     </div>
                     
                     <div className="flex items-center space-x-1 space-x-reverse">
-                      <User className="w-3 h-3" />
-                      <span className="truncate">{book.teacherName}</span>
+                      <User className="w-3 h-3 flex-shrink-0" />
+                      <span className="truncate text-xs sm:text-sm">{book.teacherName}</span>
                     </div>
                     
                     <div className="flex items-center space-x-1 space-x-reverse">
-                      <Calendar className="w-3 h-3" />
-                      <span>{formatDateArabicIndic(book.dateAdded)}</span>
+                      <Calendar className="w-3 h-3 flex-shrink-0" />
+                      <span className="text-xs sm:text-sm">{formatDateArabicIndic(book.dateAdded)}</span>
                     </div>
 
-                    <div className="flex items-center justify-between pt-2 border-t border-gray-200">
-                      <div className="flex items-center space-x-3 space-x-reverse text-xs">
+                    <div className="flex items-center justify-between pt-1.5 sm:pt-2 border-t border-gray-200">
+                      <div className="flex items-center space-x-2 sm:space-x-3 space-x-reverse text-xs">
                         <div className="flex items-center space-x-1 space-x-reverse">
                           <Eye className="w-3 h-3" />
                           <span>{toArabicIndic(book.clickCount)}</span>
@@ -267,28 +332,28 @@ export default function BooksTable({
                           <span>{toArabicIndic(book.favoritesCount)}</span>
                         </div>
                       </div>
-                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                      <span className="text-xs bg-blue-100 text-blue-800 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded flex-shrink-0">
                         {book.bookType}
                       </span>
                     </div>
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-200">
-                    <div className="flex items-center space-x-2 space-x-reverse">
+                  <div className="flex items-center justify-between mt-2 sm:mt-4 pt-2 sm:pt-3 border-t border-gray-200">
+                    <div className="flex items-center space-x-1.5 sm:space-x-2 space-x-reverse">
                       <button
                         onClick={() => handleEdit(book)}
-                        className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors duration-200"
+                        className="p-1 sm:p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors duration-200"
                         title="دەستکاری"
                       >
-                        <Edit className="w-4 h-4" />
+                        <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(book.id)}
-                        className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors duration-200"
+                        className="p-1 sm:p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors duration-200"
                         title="سڕینەوە"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                       </button>
                     </div>
                     {book.url && book.url !== 'نەزانراو' && (
@@ -308,10 +373,10 @@ export default function BooksTable({
           </div>
         ) : (
           /* List View */
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             {filteredBooks.map((book) => (
-              <div key={book.id} className="bg-gray-50 rounded-lg border border-gray-200 p-4 hover:shadow-sm transition-shadow duration-200">
-                <div className="flex items-center gap-4">
+              <div key={book.id} className="bg-gray-50 rounded-lg border border-gray-200 p-3 sm:p-4 hover:shadow-sm transition-shadow duration-200">
+                <div className="flex items-center gap-3 sm:gap-4">
                   {/* Book Image */}
                   <div className="w-16 h-20 bg-white rounded border border-gray-200 flex-shrink-0 relative overflow-hidden">
                     {book.image && book.image !== 'نەزانراو' ? (
@@ -332,21 +397,21 @@ export default function BooksTable({
 
                   {/* Book Info */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">
                       <div className="flex-1 min-w-0 text-right">
-                        <h3 className="font-medium text-gray-900 mb-1 truncate">
+                        <h3 className="font-medium text-gray-900 mb-1 text-sm sm:text-base line-clamp-1 sm:line-clamp-none">
                           {book.title}
                         </h3>
-                        <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600 mb-2">
                           <span className="text-blue-600 font-medium">{book.subjectName}</span>
                           <span className="flex items-center space-x-1 space-x-reverse">
                             <User className="w-3 h-3" />
-                            <span>{book.teacherName}</span>
+                            <span className="truncate max-w-[120px] sm:max-w-none">{book.teacherName}</span>
                           </span>
-                          <span className="bg-gray-200 px-2 py-1 rounded text-xs">{book.grade}</span>
-                          <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">{book.bookType}</span>
+                          <span className="bg-gray-200 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs">{book.grade}</span>
+                          <span className="bg-blue-100 text-blue-800 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs">{book.bookType}</span>
                         </div>
-                        <div className="flex items-center gap-4 text-xs text-gray-500">
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs text-gray-500">
                           <span className="flex items-center space-x-1 space-x-reverse">
                             <Calendar className="w-3 h-3" />
                             <span>{formatDateArabicIndic(book.dateAdded)}</span>
@@ -363,30 +428,30 @@ export default function BooksTable({
                       </div>
 
                       {/* Actions */}
-                      <div className="flex items-center space-x-2 space-x-reverse ml-4">
+                      <div className="flex items-center space-x-1.5 sm:space-x-2 space-x-reverse flex-shrink-0">
                         {book.url && book.url !== 'نەزانراو' && (
                           <a
                             href={book.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="px-3 py-1.5 text-xs text-blue-600 hover:text-blue-800 font-medium border border-blue-200 rounded hover:bg-blue-50 transition-colors duration-200"
+                            className="px-2 sm:px-3 py-1 sm:py-1.5 text-xs text-blue-600 hover:text-blue-800 font-medium border border-blue-200 rounded hover:bg-blue-50 transition-colors duration-200"
                           >
                             بینین
                           </a>
                         )}
                         <button
                           onClick={() => handleEdit(book)}
-                          className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors duration-200"
+                          className="p-1 sm:p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors duration-200"
                           title="دەستکاری"
                         >
-                          <Edit className="w-4 h-4" />
+                          <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(book.id)}
-                          className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors duration-200"
+                          className="p-1 sm:p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors duration-200"
                           title="سڕینەوە"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                         </button>
                       </div>
                     </div>
@@ -406,6 +471,15 @@ export default function BooksTable({
           teachers={teachers}
           onSave={handleSave}
           onClose={() => setIsModalOpen(false)}
+        />
+      )}
+
+      {/* JSON Import Modal */}
+      {isJsonImportOpen && (
+        <JsonImportModal
+          type="books"
+          onImport={handleJsonImport}
+          onClose={() => setIsJsonImportOpen(false)}
         />
       )}
     </div>
